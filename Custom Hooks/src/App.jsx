@@ -8,38 +8,29 @@ import AvailablePlaces from "./components/AvailablePlaces.jsx";
 import { fetchUserPlaces, updateUserPlaces } from "./http.js";
 import ErrorMessage from "./components/Error.jsx";
 import { useEffect } from "react";
+import useFetch from "./hooks/useFetch.js";
 
 function App() {
   const selectedPlace = useRef();
 
-  const [userPlaces, setUserPlaces] = useState([]);
+  // const [userPlaces, setUserPlaces] = useState([]);
 
   const [modalIsOpen, setModalIsOpen] = useState(false);
 
   const [erroUpdatingPlaces, setErrorUpdatingPlaces] = useState(null);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [loadingText, setLoadingText] = useState(null);
-  const [error, setError] = useState(null);
+  // const [isUpdating, setIsUpdating] = useState(false);
+  // const [loadingText, setLoadingText] = useState(null);
+  // const [error, setError] = useState(null);
 
-  useEffect(() => {
-    async function fetchPlaces(params) {
-      setIsUpdating(true);
-      setLoadingText("Fetching your places...");
-      try {
-        const places = await fetchUserPlaces();
-        setUserPlaces(places);
-      } catch (error) {
-        setError({
-          message:
-            error.message ||
-            "Could not fetch user places. Please try again later.",
-        });
-      }
-      setIsUpdating(false);
-    }
-
-    fetchPlaces();
-  }, []);
+  const {
+    isUpdating,
+    loadingText,
+    error,
+    fetchedData,
+    setFetchedData,
+    setIsUpdating,
+    setLoadingText,
+  } = useFetch(fetchUserPlaces, []);
 
   function handleStartRemovePlace(place) {
     setModalIsOpen(true);
@@ -58,8 +49,8 @@ function App() {
     setIsUpdating(true);
     setLoadingText("Updating user places...");
     try {
-      await updateUserPlaces([selectedPlace, ...userPlaces]);
-      setUserPlaces((prevPickedPlaces) => {
+      await updateUserPlaces([selectedPlace, ...fetchedData]);
+      setFetchedData((prevPickedPlaces) => {
         if (!prevPickedPlaces) {
           prevPickedPlaces = [];
         }
@@ -69,7 +60,7 @@ function App() {
         return [selectedPlace, ...prevPickedPlaces];
       });
     } catch (error) {
-      setUserPlaces(userPlaces);
+      setFetchedData(fetchedData);
       setErrorUpdatingPlaces({
         message:
           error.message || "Failed to update places. Please try again later.",
@@ -85,15 +76,15 @@ function App() {
       setModalIsOpen(false);
       try {
         await updateUserPlaces(
-          userPlaces.filter((place) => place.id !== selectedPlace.current.id)
+          fetchedData.filter((place) => place.id !== selectedPlace.current.id)
         );
-        setUserPlaces((prevPickedPlaces) =>
+        setFetchedData((prevPickedPlaces) =>
           prevPickedPlaces.filter(
             (place) => place.id !== selectedPlace.current.id
           )
         );
       } catch (error) {
-        setUserPlaces(userPlaces);
+        setFetchedData(fetchedData);
         setErrorUpdatingPlaces({
           message:
             error.message || "Failed to delete place. Please try again later.",
@@ -102,7 +93,7 @@ function App() {
 
       setIsUpdating(false);
     },
-    [userPlaces]
+    [fetchedData]
   );
 
   return (
@@ -142,7 +133,7 @@ function App() {
             isLoading={isUpdating}
             loadingText={loadingText}
             fallbackText="Select the places you would like to visit below."
-            places={userPlaces}
+            places={fetchedData}
             onSelectPlace={handleStartRemovePlace}
           />
         )}
