@@ -1,10 +1,13 @@
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback } from "react";
 
-import Places from './components/Places.jsx';
-import Modal from './components/Modal.jsx';
-import DeleteConfirmation from './components/DeleteConfirmation.jsx';
-import logoImg from './assets/logo.png';
-import AvailablePlaces from './components/AvailablePlaces.jsx';
+import Places from "./components/Places.jsx";
+import Modal from "./components/Modal.jsx";
+import DeleteConfirmation from "./components/DeleteConfirmation.jsx";
+import logoImg from "./assets/logo.png";
+import AvailablePlaces from "./components/AvailablePlaces.jsx";
+import { fetchUserPlaces, updateUserPlaces } from "./http.js";
+import ErrorMessage from "./components/Error.jsx";
+import { useEffect } from "react";
 
 function App() {
   const selectedPlace = useRef();
@@ -12,6 +15,31 @@ function App() {
   const [userPlaces, setUserPlaces] = useState([]);
 
   const [modalIsOpen, setModalIsOpen] = useState(false);
+
+  const [erroUpdatingPlaces, setErrorUpdatingPlaces] = useState(null);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [loadingText, setLoadingText] = useState(null);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    async function fetchPlaces(params) {
+      setIsUpdating(true);
+      setLoadingText("Fetching your places...");
+      try {
+        const places = await fetchUserPlaces();
+        setUserPlaces(places);
+      } catch (error) {
+        setError({
+          message:
+            error.message ||
+            "Could not fetch user places. Please try again later.",
+        });
+      }
+      setIsUpdating(false);
+    }
+
+    fetchPlaces();
+  }, []);
 
   function handleStartRemovePlace(place) {
     setModalIsOpen(true);
@@ -22,28 +50,73 @@ function App() {
     setModalIsOpen(false);
   }
 
-  function handleSelectPlace(selectedPlace) {
-    setUserPlaces((prevPickedPlaces) => {
-      if (!prevPickedPlaces) {
-        prevPickedPlaces = [];
-      }
-      if (prevPickedPlaces.some((place) => place.id === selectedPlace.id)) {
-        return prevPickedPlaces;
-      }
-      return [selectedPlace, ...prevPickedPlaces];
-    });
+  function handleError() {
+    setErrorUpdatingPlaces(null);
   }
 
-  const handleRemovePlace = useCallback(async function handleRemovePlace() {
-    setUserPlaces((prevPickedPlaces) =>
-      prevPickedPlaces.filter((place) => place.id !== selectedPlace.current.id)
-    );
+  async function handleSelectPlace(selectedPlace) {
+    setIsUpdating(true);
+    setLoadingText("Updating user places...");
+    try {
+      await updateUserPlaces([selectedPlace, ...userPlaces]);
+      setUserPlaces((prevPickedPlaces) => {
+        if (!prevPickedPlaces) {
+          prevPickedPlaces = [];
+        }
+        if (prevPickedPlaces.some((place) => place.id === selectedPlace.id)) {
+          return prevPickedPlaces;
+        }
+        return [selectedPlace, ...prevPickedPlaces];
+      });
+    } catch (error) {
+      setUserPlaces(userPlaces);
+      setErrorUpdatingPlaces({
+        message:
+          error.message || "Failed to update places. Please try again later.",
+      });
+    }
+    setIsUpdating(false);
+  }
 
-    setModalIsOpen(false);
-  }, []);
+  const handleRemovePlace = useCallback(
+    async function handleRemovePlace() {
+      setIsUpdating(true);
+      setLoadingText("Updating user places...");
+      setModalIsOpen(false);
+      try {
+        await updateUserPlaces(
+          userPlaces.filter((place) => place.id !== selectedPlace.current.id)
+        );
+        setUserPlaces((prevPickedPlaces) =>
+          prevPickedPlaces.filter(
+            (place) => place.id !== selectedPlace.current.id
+          )
+        );
+      } catch (error) {
+        setUserPlaces(userPlaces);
+        setErrorUpdatingPlaces({
+          message:
+            error.message || "Failed to delete place. Please try again later.",
+        });
+      }
+
+      setIsUpdating(false);
+    },
+    [userPlaces]
+  );
 
   return (
     <>
+      <Modal open={erroUpdatingPlaces} onClose={handleError}>
+        {erroUpdatingPlaces && (
+          <ErrorMessage
+            title={"An error occured!"}
+            message={erroUpdatingPlaces.message}
+            onConfirm={handleError}
+          />
+        )}
+      </Modal>
+
       <Modal open={modalIsOpen} onClose={handleStopRemovePlace}>
         <DeleteConfirmation
           onCancel={handleStopRemovePlace}
@@ -60,12 +133,19 @@ function App() {
         </p>
       </header>
       <main>
-        <Places
-          title="I'd like to visit ..."
-          fallbackText="Select the places you would like to visit below."
-          places={userPlaces}
-          onSelectPlace={handleStartRemovePlace}
-        />
+        {error && (
+          <ErrorMessage title={"An error occured!"} message={error.message} />
+        )}
+        {!error && (
+          <Places
+            title="I'd like to visit ..."
+            isLoading={isUpdating}
+            loadingText={loadingText}
+            fallbackText="Select the places you would like to visit below."
+            places={userPlaces}
+            onSelectPlace={handleStartRemovePlace}
+          />
+        )}
 
         <AvailablePlaces onSelectPlace={handleSelectPlace} />
       </main>
