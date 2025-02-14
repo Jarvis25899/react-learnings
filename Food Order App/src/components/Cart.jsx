@@ -1,14 +1,8 @@
 import { useContext } from "react";
 import { CartContext } from "../store/cart-context";
 
-export default function Cart() {
+export default function Cart({ actions, totalPrice }) {
   const { items, updateItemQty } = useContext(CartContext);
-
-  const totalPrice = items.reduce(
-    (acc, item) => acc + item.price * item.qty,
-    0
-  );
-  const formattedTotalPrice = `$${totalPrice.toFixed(2)}`;
 
   return (
     <div className="cart">
@@ -22,7 +16,7 @@ export default function Cart() {
               <li key={item.id} className="cart-item">
                 <p>
                   <span>{item.name}</span>
-                  <span> ({formattedPrice})</span>
+                  <span>{` - ${item.qty} x ${formattedPrice}`}</span>
                 </p>
                 <div className="cart-item-actions">
                   <button onClick={() => updateItemQty(item.id, -1)}>-</button>
@@ -35,8 +29,11 @@ export default function Cart() {
         </ul>
       )}
       <div className="cart-total">
-        Cart Total: <strong>{formattedTotalPrice}</strong>
+        <strong> {totalPrice}</strong>
       </div>
+      <form method="dialog" className="modal-actions">
+        {actions}
+      </form>
     </div>
   );
 }
