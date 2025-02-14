@@ -214,8 +214,13 @@ h1 {
   border-radius: 4px;
 }
 
-.button:hover,
-.button:active {
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.button:not(:disabled):hover,
+.button:not(:disabled):active {
   background-color: #ffab04;
   border-color: #ffab04;
   color: #1f1a09;
@@ -229,9 +234,14 @@ h1 {
   color: #ffc404;
 }
 
-.text-button:hover,
-.text-button:active {
+.text-button:not(:disabled):hover,
+.text-button:not(:disabled):active {
   color: #ffab04;
+}
+
+.text-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
 }
 
 .modal {
@@ -250,10 +260,9 @@ h1 {
 }
 
 .error {
-  max-width: 40rem;
   margin: 1rem auto;
-  padding: 1rem;
-  background-color: #f4c7c7;
+  height: 2rem;
+  padding: 0.5rem 0;
   color: #3e0505;
 }
 

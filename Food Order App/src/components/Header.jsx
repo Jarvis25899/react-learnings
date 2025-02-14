@@ -4,10 +4,12 @@ import Cart from "./Cart";
 import { CartContext } from "../store/cart-context";
 import CartModal from "./CartModal";
 import Checkout from "./Checkout";
+import Success from "./Success";
 
 export default function Header() {
   const [isCartOpen, setIsCartOpen] = useState();
   const [isCheckoutOpen, setIsCheckoutOpen] = useState();
+  const [orderSubmitted, setOrderSubmitted] = useState(false);
   const { items } = useContext(CartContext);
 
   const totalItems = items.reduce((acc, item) => acc + item.qty, 0);
@@ -26,11 +28,16 @@ export default function Header() {
   }
 
   function goToCheckout() {
+    setOrderSubmitted(false);
     setIsCheckoutOpen(true);
   }
 
   function closeCheckout() {
     setIsCheckoutOpen(false);
+  }
+
+  function openSuccesMessage() {
+    setOrderSubmitted(true);
   }
 
   let modalActions = <button className="text-button">Close</button>;
@@ -55,14 +62,20 @@ export default function Header() {
       )}
       {isCheckoutOpen && (
         <CartModal
-          title="Checkout"
+          title={orderSubmitted ? "Success!" : "Checkout"}
           open={isCheckoutOpen}
           onClose={closeCheckout}
         >
-          <Checkout
-            totalPrice={formattedTotalPrice}
-            closeModal={closeCheckout}
-          />
+          {orderSubmitted ? (
+            <Success closeCheckout={closeCheckout} />
+          ) : (
+            <Checkout
+              totalPrice={formattedTotalPrice}
+              closeModal={closeCheckout}
+              onSuccess={openSuccesMessage}
+              items={items}
+            />
+          )}
         </CartModal>
       )}
       <header id="main-header">

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import MealItem from "./MealItem.jsx";
 import ErrorMessage from "./Error.jsx";
+import { fetchAvailableMeals } from "../http.js";
 
 export default function Meals() {
   const [meals, setMeals] = useState([]);
@@ -11,13 +12,7 @@ export default function Meals() {
     async function fetchMeals() {
       setIsLoading(true);
       try {
-        const response = await fetch("http://localhost:3000/meals");
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch meals");
-        }
-
+        const data = await fetchAvailableMeals();
         setMeals(data);
       } catch (error) {
         setError({
