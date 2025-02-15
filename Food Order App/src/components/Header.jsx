@@ -2,7 +2,7 @@ import { useContext, useState } from "react";
 import reactFoodLogo from "../assets/logo.jpg";
 import Cart from "./Cart";
 import { CartContext } from "../store/cart-context";
-import CartModal from "./CartModal";
+import Modal from "./Modal";
 import Checkout from "./Checkout";
 import Success from "./Success";
 
@@ -38,6 +38,7 @@ export default function Header() {
 
   function openSuccesMessage() {
     setOrderSubmitted(true);
+    setIsCheckoutOpen(false);
   }
 
   let modalActions = <button className="text-button">Close</button>;
@@ -56,28 +57,27 @@ export default function Header() {
   return (
     <>
       {isCartOpen && (
-        <CartModal title="Your Cart" open={isCartOpen} onClose={closeCart}>
+        <Modal title="Your Cart" open={isCartOpen} onClose={closeCart}>
           <Cart actions={modalActions} totalPrice={formattedTotalPrice} />
-        </CartModal>
+        </Modal>
       )}
       {isCheckoutOpen && (
-        <CartModal
-          title={orderSubmitted ? "Success!" : "Checkout"}
-          open={isCheckoutOpen}
-          onClose={closeCheckout}
-        >
-          {orderSubmitted ? (
-            <Success closeCheckout={closeCheckout} />
-          ) : (
-            <Checkout
-              totalPrice={formattedTotalPrice}
-              closeModal={closeCheckout}
-              onSuccess={openSuccesMessage}
-              items={items}
-            />
-          )}
-        </CartModal>
+        <Modal title="Checkout" open={isCheckoutOpen} onClose={closeCheckout}>
+          <Checkout
+            totalPrice={formattedTotalPrice}
+            closeModal={closeCheckout}
+            onSuccess={openSuccesMessage}
+            items={items}
+          />
+        </Modal>
       )}
+      <Modal
+        title="Success!"
+        open={orderSubmitted}
+        onClose={() => setOrderSubmitted(false)}
+      >
+        <Success />
+      </Modal>
       <header id="main-header">
         <div id="title">
           <img src={reactFoodLogo} alt="React Food" />

@@ -1,3 +1,5 @@
+import { createPortal } from "react-dom";
+
 export default function Success({ closeCheckout }) {
   return (
     <>
@@ -6,11 +8,9 @@ export default function Success({ closeCheckout }) {
         We will get back to you with more details via email within the next few
         minutes.
       </p>
-      <div className="modal-actions">
-        <button className="button" onClick={closeCheckout}>
-          Okay
-        </button>
-      </div>
+      <form method="dialog" className="modal-actions">
+        <button className="button">Okay</button>
+      </form>
     </>
   );
 }

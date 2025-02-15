@@ -31,10 +31,6 @@ export default function Checkout({ totalPrice, closeModal, onSuccess, items }) {
     submitOrder();
   }
 
-  function handleError() {
-    setError(null);
-  }
-
   return (
     <>
       <form onSubmit={onSubmitOrder}>
