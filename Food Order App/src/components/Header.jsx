@@ -10,7 +10,7 @@ export default function Header() {
   const [isCartOpen, setIsCartOpen] = useState();
   const [isCheckoutOpen, setIsCheckoutOpen] = useState();
   const [orderSubmitted, setOrderSubmitted] = useState(false);
-  const { items } = useContext(CartContext);
+  const { items, resetItems } = useContext(CartContext);
 
   const totalItems = items.reduce((acc, item) => acc + item.qty, 0);
   const totalPrice = items.reduce(
@@ -28,7 +28,6 @@ export default function Header() {
   }
 
   function goToCheckout() {
-    setOrderSubmitted(false);
     setIsCheckoutOpen(true);
   }
 
@@ -39,6 +38,11 @@ export default function Header() {
   function openSuccesMessage() {
     setOrderSubmitted(true);
     setIsCheckoutOpen(false);
+  }
+
+  function onOrderSuccess() {
+    setOrderSubmitted(false);
+    resetItems();
   }
 
   let modalActions = <button className="text-button">Close</button>;
@@ -71,15 +75,9 @@ export default function Header() {
           />
         </Modal>
       )}
-      {orderSubmitted && (
-        <Modal
-          title="Success!"
-          open={orderSubmitted}
-          onClose={() => setOrderSubmitted(false)}
-        >
-          <Success />
-        </Modal>
-      )}
+      <Modal title="Success!" open={orderSubmitted} onClose={onOrderSuccess}>
+        <Success />
+      </Modal>
       <header id="main-header">
         <div id="title">
           <img src={reactFoodLogo} alt="React Food" />
