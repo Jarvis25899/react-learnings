@@ -71,13 +71,15 @@ export default function Header() {
           />
         </Modal>
       )}
-      <Modal
-        title="Success!"
-        open={orderSubmitted}
-        onClose={() => setOrderSubmitted(false)}
-      >
-        <Success />
-      </Modal>
+      {orderSubmitted && (
+        <Modal
+          title="Success!"
+          open={orderSubmitted}
+          onClose={() => setOrderSubmitted(false)}
+        >
+          <Success />
+        </Modal>
+      )}
       <header id="main-header">
         <div id="title">
           <img src={reactFoodLogo} alt="React Food" />
