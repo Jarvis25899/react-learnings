@@ -1,10 +1,6 @@
-import { useContext } from "react";
-import { CartContext } from "../store/cart-context";
 import { currencyFormatter } from "../formatting";
 
-export default function Cart({ actions, totalPrice }) {
-  const { items, updateItemQty } = useContext(CartContext);
-
+export default function Cart({ actions, totalPrice, items, updateItemQty }) {
   return (
     <div className="cart">
       {(!items || items.length === 0) && <p>No items in cart!</p>}

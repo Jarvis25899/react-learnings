@@ -11,7 +11,7 @@ export default function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [orderSubmitted, setOrderSubmitted] = useState(false);
-  const { items, resetItems } = useContext(CartContext);
+  const { items, updateItemQty, resetItems } = useContext(CartContext);
 
   const totalItems = items.reduce((acc, item) => acc + item.qty, 0);
   const totalPrice = items.reduce(
@@ -63,7 +63,12 @@ export default function Header() {
     <>
       {isCartOpen && (
         <Modal title="Your Cart" open={isCartOpen} onClose={closeCart}>
-          <Cart actions={modalActions} totalPrice={formattedTotalPrice} />
+          <Cart
+            actions={modalActions}
+            totalPrice={formattedTotalPrice}
+            items={items}
+            updateItemQty={updateItemQty}
+          />
         </Modal>
       )}
       {isCheckoutOpen && (
