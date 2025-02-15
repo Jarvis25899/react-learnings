@@ -7,8 +7,8 @@ import Checkout from "./Checkout";
 import Success from "./Success";
 
 export default function Header() {
-  const [isCartOpen, setIsCartOpen] = useState();
-  const [isCheckoutOpen, setIsCheckoutOpen] = useState();
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [orderSubmitted, setOrderSubmitted] = useState(false);
   const { items, resetItems } = useContext(CartContext);
 
