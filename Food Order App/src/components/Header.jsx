@@ -5,6 +5,7 @@ import { CartContext } from "../store/cart-context";
 import Modal from "./Modal";
 import Checkout from "./Checkout";
 import Success from "./Success";
+import { currencyFormatter } from "../formatting";
 
 export default function Header() {
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -17,7 +18,7 @@ export default function Header() {
     (acc, item) => acc + item.price * item.qty,
     0
   );
-  const formattedTotalPrice = `$${totalPrice.toFixed(2)}`;
+  const formattedTotalPrice = currencyFormatter.format(totalPrice);
 
   function openCart() {
     setIsCartOpen(true);

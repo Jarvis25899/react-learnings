@@ -1,10 +1,11 @@
 import { useContext } from "react";
 import { CartContext } from "../store/cart-context";
+import { currencyFormatter } from "../formatting";
 
 export default function MealItem({ meal }) {
   const { addItemToCart } = useContext(CartContext);
 
-  const formattedPrice = `$${(+meal.price).toFixed(2)}`;
+  const formattedPrice = currencyFormatter.format(meal.price);
 
   return (
     <div className="meal-item">

@@ -1,5 +1,6 @@
 import { useContext } from "react";
 import { CartContext } from "../store/cart-context";
+import { currencyFormatter } from "../formatting";
 
 export default function Cart({ actions, totalPrice }) {
   const { items, updateItemQty } = useContext(CartContext);
@@ -10,7 +11,7 @@ export default function Cart({ actions, totalPrice }) {
       {items?.length > 0 && (
         <ul>
           {items.map((item) => {
-            const formattedPrice = `$${item.price.toFixed(2)}`;
+            const formattedPrice = currencyFormatter.format(item.price);
 
             return (
               <li key={item.id} className="cart-item">
