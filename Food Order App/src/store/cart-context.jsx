@@ -1,4 +1,4 @@
-import { createContext, useState } from "react";
+import { createContext, useReducer, useState } from "react";
 
 export const CartContext = createContext({
   items: [],
@@ -7,15 +7,16 @@ export const CartContext = createContext({
   resetItems: () => {},
 });
 
-export default function CartContextProvider({ children }) {
-  const [cartItems, setCartItems] = useState([]);
-
-  function handleAddItem(meal) {
-    setCartItems((prevItems) => {
-      const updatedItems = [...prevItems];
-      const existingItemIndex = updatedItems.findIndex(
-        (item) => item.id === meal.id
-      );
+function cartReducer(state, action) {
+  const updatedItems = [...state.items];
+  let existingItemIndex;
+  if (action.payload) {
+    existingItemIndex = updatedItems.findIndex(
+      (item) => item.id === action.payload.id
+    );
+  }
+  switch (action.type) {
+    case "ADD_ITEM":
       if (existingItemIndex !== -1) {
         const existingItem = updatedItems[existingItemIndex];
         const updatedPresentItem = {
@@ -26,47 +27,69 @@ export default function CartContextProvider({ children }) {
         updatedItems[existingItemIndex] = { ...updatedPresentItem };
       } else {
         updatedItems.push({
-          id: meal.id,
-          name: meal.name,
-          price: +meal.price,
+          id: action.payload.id,
+          name: action.payload.name,
+          price: +action.payload.price,
           qty: 1,
         });
       }
-
-      return updatedItems;
-    });
-  }
-
-  function handleUpdateItem(id, amount) {
-    setCartItems((prevItems) => {
-      const updatedItems = [...prevItems];
-      const existingItemIndex = updatedItems.findIndex(
-        (item) => item.id === id
-      );
+      return { ...state, items: updatedItems };
+    case "UPDATE_ITEM":
       if (existingItemIndex !== -1) {
         const existingItem = updatedItems[existingItemIndex];
         const updatedPresentItem = {
           ...existingItem,
-          qty: existingItem.qty + amount,
+          qty: existingItem.qty + action.payload.amount,
         };
 
         if (updatedPresentItem.qty === 0) {
           updatedItems.splice(existingItemIndex, 1);
-          return updatedItems;
+          return { ...state, items: updatedItems };
         }
 
         updatedItems[existingItemIndex] = { ...updatedPresentItem };
       }
+      return { ...state, items: updatedItems };
+    case "RESET":
+      return { ...state, items: [] };
+    default:
+      return state;
+  }
+}
 
-      return updatedItems;
+export default function CartContextProvider({ children }) {
+  const [cartState, cartStateDispatcher] = useReducer(cartReducer, {
+    items: [],
+  });
+
+  function handleAddItem(meal) {
+    cartStateDispatcher({
+      type: "ADD_ITEM",
+      payload: meal,
+    });
+  }
+
+  function handleUpdateItem(id, amount) {
+    cartStateDispatcher({
+      type: "UPDATE_ITEM",
+      payload: {
+        id,
+        amount,
+      },
+    });
+  }
+
+  function resetItems() {
+    cartStateDispatcher({
+      type: "RESET",
     });
   }
 
   const ctxValue = {
-    items: cartItems,
+    items: cartState.items,
     addItemToCart: handleAddItem,
     updateItemQty: handleUpdateItem,
-    resetItems: () => setCartItems([]),
+    resetItems: resetItems,
   };
 
   return (
