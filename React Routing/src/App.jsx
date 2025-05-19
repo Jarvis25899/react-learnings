@@ -5,10 +5,13 @@ import {
   // Route,
 } from "react-router-dom";
 import Home from "./components/Home";
-import Products from "./components/Products";
+// import Products from "./components/Products";
 import RootLayout from "./components/Root";
 import ErrorPage from "./pages/Error";
 import ProductDetail from "./components/ProductDetail";
+import { lazy } from "react";
+
+const Products = lazy(() => import("./components/Products"));
 
 // Approach 1
 const ROUTES = [
